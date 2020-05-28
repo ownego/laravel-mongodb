@@ -4,6 +4,7 @@ namespace Jenssegers\Mongodb\Schema;
 
 use Closure;
 use Jenssegers\Mongodb\Connection;
+use MongoDB\Model\CollectionInfo;
 
 class Builder extends \Illuminate\Database\Schema\Builder
 {
@@ -104,6 +105,26 @@ class Builder extends \Illuminate\Database\Schema\Builder
         $blueprint = $this->createBlueprint($collection);
 
         return $blueprint->drop();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function dropAllTables()
+    {
+        $this->dropAllCollections();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function dropAllCollections()
+    {
+        $collections = collect($this->connection->getMongoDB()->listCollections());
+
+        $collections->each(function (CollectionInfo $collection) {
+            $this->drop($collection->getName());
+        });
     }
 
     /**
